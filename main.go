@@ -19,6 +19,7 @@ var version, destDir string
 
 func init() {
 	var err error
+	// FIXME: an all-singing, all-dancing semver regexp is welcome here
 	versionRxp, err = regexp.Compile(`^[0-9]+\.[0-9]+\.[0-9]+`)
 	if err != nil {
 		panic("cannot compile versionRxp")
@@ -60,26 +61,29 @@ outer:
 			log.Fatalf("error reading tarball: %s", err)
 		}
 		if protoFilter(header.Name) {
-			stripped, err := stripPath(header.Name)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			fqp := path.Join(destDir, stripped)
-			dn, _ := path.Split(fqp)
-			err = os.MkdirAll(dn, 0755)
-			if err != nil {
-				log.Fatalf("error creating directory %s: %s", dn, err)
-			}
-			f, err := os.Create(fqp)
-			if err != nil {
-				log.Fatalf("error creating file %s: %s", fqp, err)
-			}
-			defer f.Close()
-
-			io.Copy(f, tb)
+			saveProto(header, tb)
 		}
 	}
+}
+
+func saveProto(h *tar.Header, tb *tar.Reader) error {
+	stripped, err := stripPath(h.Name)
+	if err != nil {
+		return err
+	}
+	fqp := path.Join(destDir, stripped)
+	dn, _ := path.Split(fqp)
+	err = os.MkdirAll(dn, 0755)
+	if err != nil {
+		return fmt.Errorf("error creating directory %s: %s", dn, err)
+	}
+	f, err := os.Create(fqp)
+	if err != nil {
+		return fmt.Errorf("error creating file %s: %s", fqp, err)
+	}
+	defer f.Close()
+	io.Copy(f, tb)
+	return nil
 }
 
 func stripPath(p string) (string, error) {
