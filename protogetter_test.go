@@ -4,6 +4,16 @@ import (
 	"testing"
 )
 
+func TestAssembleURL(t *testing.T) {
+	exp := "https://github.com/protocolbuffers/protobuf/releases/download/v3.10.1/protobuf-all-3.10.1.tar.gz"
+	got := assembleURL("3.10.1")
+	template := "got:%s\nexpected:%s"
+	if got != exp {
+		t.Fatalf(template, got, exp)
+	}
+	t.Logf(template, got, exp)
+}
+
 func TestAssembleFilename(t *testing.T) {
 	exp := "protobuf-all-10.10.10rc1.tar.gz"
 	template := "got:%s expected:%s"
