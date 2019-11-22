@@ -3,6 +3,7 @@ package main
 import (
 	"archive/tar"
 	"compress/gzip"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -14,6 +15,7 @@ import (
 )
 
 var versionRxp, protoRxp *regexp.Regexp
+var version, destDir string
 
 func init() {
 	var err error
@@ -25,16 +27,17 @@ func init() {
 	if err != nil {
 		panic("cannot compile protoRxp")
 	}
+	flag.StringVar(&version, "version", "3.10.0", "google protobuf version to download from github")
+	flag.StringVar(&destDir, "destination", "proto", "parent path to the 'google' directory")
+	flag.Parse()
 }
 
 func main() {
-	dest := "proto"
-	v := "3.10.0"
-	sane := saneVersion(v)
+	sane := saneVersion(version)
 	if !sane {
-		log.Fatalf("%q is not a sane version number", v)
+		log.Fatalf("%q is not a sane version number", version)
 	}
-	url := assembleURL(v)
+	url := assembleURL(version)
 	log.Printf("downloading: %s", url)
 	resp, err := http.Get(url)
 	if err != nil {
@@ -62,7 +65,7 @@ outer:
 				log.Fatal(err)
 			}
 
-			fqp := path.Join(dest, stripped)
+			fqp := path.Join(destDir, stripped)
 			dn, _ := path.Split(fqp)
 			err = os.MkdirAll(dn, 0755)
 			if err != nil {
