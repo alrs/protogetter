@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -64,6 +65,15 @@ outer:
 			saveProto(header, tb)
 		}
 	}
+	versionHint()
+}
+
+func versionHint() error {
+	hintPath := path.Join(destDir, "google", "README")
+	message := "extracted from https://github.com/protocolbuffers/protobuf\n\n" +
+		"downloaded with protogetter https://github.com/alrs/protogetter\n\n" +
+		"protobuf version: " + version + "\n"
+	return ioutil.WriteFile(hintPath, []byte(message), 0644)
 }
 
 func saveProto(h *tar.Header, tb *tar.Reader) error {
