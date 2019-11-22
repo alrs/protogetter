@@ -4,6 +4,23 @@ import (
 	"testing"
 )
 
+func TestProtoFilter(t *testing.T) {
+	cases := map[string]bool{
+		"proto/src/google/deeper/file.proto": true,
+		"":                                   false,
+		"proto/src":                          false,
+		"proto/src/google/file.proto":        true,
+	}
+	template := "got:%t expected:%t"
+	for dir, exp := range cases {
+		got := protoFilter(dir)
+		if got != exp {
+			t.Fatalf(template, got, exp)
+		}
+		t.Logf(template, got, exp)
+	}
+}
+
 func TestStripPath(t *testing.T) {
 	cases := map[string]string{
 		"one/two/three/four": "three/four",
