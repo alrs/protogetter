@@ -29,12 +29,12 @@ func init() {
 	if err != nil {
 		panic("cannot compile protoRxp")
 	}
-	flag.StringVar(&version, "version", "3.10.0", "google protobuf version to download from github")
-	flag.StringVar(&destDir, "destination", "proto", "parent path to the 'google' directory")
-	flag.Parse()
 }
 
 func main() {
+	flag.StringVar(&version, "version", "3.10.0", "google protobuf version to download from github")
+	flag.StringVar(&destDir, "destination", "proto", "parent path to the 'google' directory")
+	flag.Parse()
 	sane := saneVersion(version)
 	if !sane {
 		log.Fatalf("%q is not a sane version number", version)
