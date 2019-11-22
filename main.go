@@ -65,15 +65,26 @@ outer:
 			saveProto(header, tb)
 		}
 	}
-	versionHint()
+	err = writeReadme()
+	if err != nil {
+		log.Fatalf("error writing readme: %s", err)
+	}
+	err = writeVersion()
+	if err != nil {
+		log.Fatalf("error writing version: %s", err)
+	}
 }
 
-func versionHint() error {
+func writeReadme() error {
 	hintPath := path.Join(destDir, "google", "README")
 	message := "extracted from https://github.com/protocolbuffers/protobuf\n\n" +
-		"downloaded with protogetter https://github.com/alrs/protogetter\n\n" +
-		"protobuf version: " + version + "\n"
+		"downloaded with protogetter https://github.com/alrs/protogetter\n\n"
 	return ioutil.WriteFile(hintPath, []byte(message), 0644)
+}
+
+func writeVersion() error {
+	versionPath := path.Join(destDir, "google", "VERSION")
+	return ioutil.WriteFile(versionPath, []byte(version), 0644)
 }
 
 func saveProto(h *tar.Header, tb *tar.Reader) error {
