@@ -4,6 +4,25 @@ import (
 	"testing"
 )
 
+func TestStripPath(t *testing.T) {
+	cases := map[string]string{
+		"one/two/three/four": "three/four",
+		"eins/zwei/drei":     "drei",
+	}
+
+	template := "got:%q expected:%q"
+	for path, exp := range cases {
+		got, err := stripPath(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got != exp {
+			t.Fatalf(template, got, exp)
+		}
+		t.Logf(template, got, exp)
+	}
+}
+
 func TestAssembleURL(t *testing.T) {
 	exp := "https://github.com/protocolbuffers/protobuf/releases/download/v3.10.1/protobuf-all-3.10.1.tar.gz"
 	got := assembleURL("3.10.1")
