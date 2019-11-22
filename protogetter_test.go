@@ -4,6 +4,16 @@ import (
 	"testing"
 )
 
+func TestAssembleFilename(t *testing.T) {
+	exp := "protobuf-all-10.10.10rc1.tar.gz"
+	template := "got:%s expected:%s"
+	got := assembleFilename("10.10.10rc1")
+	if got != exp {
+		t.Fatalf(template, got, exp)
+	}
+	t.Logf(template, got, exp)
+}
+
 func TestSaneVersion(t *testing.T) {
 	cases := map[string]bool{
 		"0.0.0":      true,
