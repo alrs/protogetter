@@ -40,12 +40,12 @@ func main() {
 		log.Fatalf("%q is not a sane version number", version)
 	}
 	url := assembleURL(version)
-	log.Printf("downloading: %s", url)
+	log.Printf(url)
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Fatalf("error downloading %s: %s", url, err)
 	}
-	log.Print(resp.StatusCode)
+	log.Printf("GET: %d", resp.StatusCode)
 	gz, err := gzip.NewReader(resp.Body)
 	if err != nil {
 		log.Fatalf("error reading gzip: %s", err)
@@ -62,7 +62,11 @@ outer:
 			log.Fatalf("error reading tarball: %s", err)
 		}
 		if protoFilter(header.Name) {
-			saveProto(header, tb)
+			p, err := saveProto(header, tb)
+			if err != nil {
+				log.Fatalf("error saving .proto: %s", err)
+			}
+			log.Print(p)
 		}
 	}
 	err = writeReadme()
@@ -87,24 +91,24 @@ func writeVersion() error {
 	return ioutil.WriteFile(versionPath, []byte(version), 0644)
 }
 
-func saveProto(h *tar.Header, tb *tar.Reader) error {
+func saveProto(h *tar.Header, tb *tar.Reader) (string, error) {
 	stripped, err := stripPath(h.Name)
 	if err != nil {
-		return err
+		return "", err
 	}
 	fqp := path.Join(destDir, stripped)
 	dn, _ := path.Split(fqp)
 	err = os.MkdirAll(dn, 0755)
 	if err != nil {
-		return fmt.Errorf("error creating directory %s: %s", dn, err)
+		return "", fmt.Errorf("error creating directory %s: %s", dn, err)
 	}
 	f, err := os.Create(fqp)
 	if err != nil {
-		return fmt.Errorf("error creating file %s: %s", fqp, err)
+		return "", fmt.Errorf("error creating file %s: %s", fqp, err)
 	}
 	defer f.Close()
 	io.Copy(f, tb)
-	return nil
+	return fqp, nil
 }
 
 func stripPath(p string) (string, error) {
